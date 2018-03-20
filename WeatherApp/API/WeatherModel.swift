@@ -9,14 +9,14 @@ import Foundation
 
 class WeatherModel {
 
-    var placeName: String!
-    var conditionIcon: String!
-    var conditionText: String!
-    var windSpeed: Double!
-    var windOrigin: Double!
-    var currTemp: Double!
-    var minTemp: Double!
-    var maxTemp: Double!
+    var placeName: String = ""
+    var conditionIcon: String = ""
+    var conditionText: String = ""
+    var windSpeed: Double = 0
+    var windOrigin: Double = 0
+    var currTemp: Double = 0
+    var minTemp: Double = 0
+    var maxTemp: Double = 0
 
     init(dict: [String:Any]) {
         if let placeName = dict["name"] as? String {
