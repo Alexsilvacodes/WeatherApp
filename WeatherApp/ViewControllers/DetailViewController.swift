@@ -59,14 +59,14 @@ class DetailViewController: UIViewController {
 
     private func fillWeatherData(weather: WeatherModel) {
         self.nameLabel.text = weather.placeName
-        let iconURL = URL(string: "http://openweathermap.org/img/w/\(weather.conditionIcon!).png")
+        let iconURL = URL(string: "http://openweathermap.org/img/w/\(weather.conditionIcon).png")
         self.iconImageView.sd_setImage(with: iconURL, placeholderImage: R.image.locArrow())
         self.descLabel.text = weather.conditionText
-        self.cTempLabel.text = "\(weather.currTemp!) Fº"
-        self.minTempLabel.text = "\(weather.minTemp!) Fº"
-        self.maxTempLabel.text = "\(weather.maxTemp!) Fº"
-        self.wSpeedLabel.text = "\(weather.windSpeed!) m/h"
-        self.wOriginLabel.text = "\(weather.windOrigin!) deg"
+        self.cTempLabel.text = "\(weather.currTemp) Fº"
+        self.minTempLabel.text = "\(weather.minTemp) Fº"
+        self.maxTempLabel.text = "\(weather.maxTemp) Fº"
+        self.wSpeedLabel.text = "\(weather.windSpeed) m/h"
+        self.wOriginLabel.text = "\(weather.windOrigin) deg"
     }
 
     // MARK: - Alerts
