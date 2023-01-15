@@ -1,15 +1,7 @@
-//
-//  MainViewController.swift
-//  WeatherApp
-//
-//  Copyright © 2018 Alexsays. All rights reserved.
-//
-
 import UIKit
 import MapKit
 
-class MainViewController: UIViewController {
-
+final class MainViewController: UIViewController {
     @IBOutlet weak var mapView: MKMapView!
     private var locationManager: CLLocationManager!
 
@@ -35,25 +27,32 @@ class MainViewController: UIViewController {
     }
 
     private func initializeLocation() {
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager = CLLocationManager()
-            locationManager.delegate = self
-            locationManager.desiredAccuracy = kCLLocationAccuracyBest
-            locationManager.requestAlwaysAuthorization()
-            checkLocationAvailability()
-        } else {
-            performSegue(withIdentifier: R.segue.mainViewController.showLocationUnavailable, sender: self)
+        DispatchQueue.global().async { [weak self] in
+            if CLLocationManager.locationServicesEnabled() {
+                DispatchQueue.main.async {
+                    self?.locationManager = CLLocationManager()
+                    self?.locationManager.delegate = self
+                    self?.locationManager.desiredAccuracy = kCLLocationAccuracyBest
+                    self?.locationManager.requestAlwaysAuthorization()
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self?.performSegue(withIdentifier: R.segue.mainViewController.showLocationUnavailable, sender: self)
+                }
+            }
         }
     }
 
-    private func checkLocationAvailability() {
-        switch CLLocationManager.authorizationStatus() {
+    private func checkLocationAvailability(manager: CLLocationManager) {
+        switch manager.authorizationStatus {
         case .authorizedAlways, .authorizedWhenInUse:
-            locationManager.startUpdatingLocation()
+            self.locationManager.startUpdatingLocation()
         case .notDetermined:
-            locationManager.requestAlwaysAuthorization()
+            self.locationManager.requestAlwaysAuthorization()
         case .denied, .restricted:
-            performSegue(withIdentifier: R.segue.mainViewController.showLocationUnavailable, sender: self)
+            self.performSegue(withIdentifier: R.segue.mainViewController.showLocationUnavailable, sender: self)
+        @unknown default:
+            fatalError()
         }
     }
 
@@ -75,13 +74,12 @@ class MainViewController: UIViewController {
     }
 
     @IBAction func centerTouched(_ sender: UIButton) {
-        checkLocationAvailability()
+        checkLocationAvailability(manager: locationManager)
     }
 
 }
 
 extension MainViewController: CLLocationManagerDelegate {
-
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.last {
             let span =  MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
@@ -103,10 +101,9 @@ extension MainViewController: CLLocationManagerDelegate {
         }
     }
 
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        checkLocationAvailability()
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        checkLocationAvailability(manager: manager)
     }
-
 }
 
 extension MainViewController: UIGestureRecognizerDelegate {

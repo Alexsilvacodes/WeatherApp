@@ -1,62 +1,46 @@
-//
-//  WheaterModel.swift
-//  WeatherApp
-//
-//  Copyright © 2018 Alexsays. All rights reserved.
-//
-
 import Foundation
 
-class WeatherModel {
+struct WeatherModel: Decodable {
+    struct Weather: Decodable {
+        var icon: String
+        var description: String
+    }
 
-    var placeName: String = ""
-    var conditionIcon: String = ""
-    var conditionText: String = ""
-    var windSpeed: Double = 0
-    var windOrigin: Double = 0
-    var currTemp: Double = 0
-    var minTemp: Double = 0
-    var maxTemp: Double = 0
+    struct Wind: Decodable {
+        var speed: Double
+        var deg: Double
+    }
 
-    init(dict: [String:Any]) {
-        if let placeName = dict["name"] as? String {
-            self.placeName = placeName
-        }
-        if let weatherArr = dict["weather"] as? [Any], let weather = weatherArr.first as? [String:Any] {
-            if let conditionIcon = weather["icon"] as? String {
-                self.conditionIcon = conditionIcon
-            }
-            if let conditionText = weather["description"] as? String {
-                self.conditionText = conditionText
-            }
-        }
-        if let wind = dict["wind"] as? [String:Any] {
-            if let windSpeed = wind["speed"] as? Double {
-                self.windSpeed = windSpeed
-            }
-            if let windOrigin = wind["deg"] as? Double {
-                self.windOrigin = windOrigin
-            }
-        }
-        if let main = dict["main"] as? [String:Any] {
-            if let currTemp = main["temp"] as? Double {
-                self.currTemp = currTemp
-            }
-            if let minTemp = main["temp_min"] as? Double {
-                self.minTemp = minTemp
-            }
-            if let maxTemp = main["temp_max"] as? Double {
-                self.maxTemp = maxTemp
-            }
-        }
+    struct Main: Decodable {
+        var temp: Double
+        var tempMin: Double
+        var tempMax: Double
+    }
+
+    let placeName: String
+    let weather: [Weather]
+    let wind: Wind
+    let main: Main
+
+    var windSpeed: Double { wind.speed }
+    var windOrigin: Double { wind.deg }
+    var currTemp: Double { main.temp }
+    var minTemp: Double { main.tempMin }
+    var maxTemp: Double { main.tempMax }
+
+    enum CodingKeys: String, CodingKey {
+        case placeName = "name"
+        case weather
+        case wind
+        case main
     }
 
     func saveToLocalStorage() {
         let weatherData: [String:Any] = [
             "name": placeName,
             "weather": [[
-                "icon": conditionIcon,
-                "description": conditionText
+                "icon": weather.first?.icon ?? "",
+                "description": weather.first?.description ?? ""
             ]],
             "wind": [
                 "speed": windSpeed,
@@ -73,8 +57,7 @@ class WeatherModel {
     }
 
     static func loadFromLocalStorage() -> WeatherModel? {
-        let weatherData = UserDefaults.standard.object(forKey: "weatherData") as! [String:Any]
-        return WeatherModel(dict: weatherData)
+        return UserDefaults.standard.object(forKey: "weatherData") as? WeatherModel
     }
 
 }

@@ -1,30 +1,26 @@
-//
-//  OpenWeatherAPI.swift
-//  WeatherApp
-//
-//  Copyright © 2018 Alexsays. All rights reserved.
-//
-
 import Foundation
 import Alamofire
 
-class OpenWeatherAPI {
-
+final class OpenWeatherAPI {
     static let shared = OpenWeatherAPI()
+
+    private let decoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return decoder
+    }()
 
     private init() { }
 
     func getWeatherByCoordinates(lat: Double, long: Double, completion: @escaping (WeatherModel?, Error?) -> Void) {
-        Alamofire.request("http://api.openweathermap.org/data/2.5/weather?lat=\(lat)&lon=\(long)&appid=ed5ece54f7caa5d8f3703bceb585aee3")
-            .responseJSON { response in
-                if let jsonDict = response.result.value as? [String:Any] {
-                    let weather = WeatherModel(dict: jsonDict)
-                    weather.saveToLocalStorage()
-                    completion(weather, nil)
-                } else {
-                    completion(nil, response.result.error)
+        AF.request("https://api.openweathermap.org/data/2.5/weather?lat=\(lat)&lon=\(long)&appid=<appid>")
+            .responseDecodable(of: WeatherModel.self, decoder: decoder) { response in
+                switch response.result {
+                case .success(let result):
+                    completion(result, nil)
+                case .failure(let error):
+                    completion(nil, error)
                 }
-        }
+            }
     }
-
 }
